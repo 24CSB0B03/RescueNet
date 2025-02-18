@@ -58,6 +58,36 @@
             transform: translateY(20px);
             animation: fadeInUp 1s ease-in-out forwards;
         }
+        .chat-box {
+            height: 200px;
+            overflow-y: auto;
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .chat-input button {
+            padding: 10px;
+            background: #d9534f;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
 
         .map {
             height: 300px;
@@ -187,6 +217,10 @@
         #livechart {
             width: 100px;
         }
+
+        canvas {
+            width: 200px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -222,13 +256,11 @@
         </div>
 
         <div class="panel">
-            <h2>Incidents</h2>
-            <p class="stat">54</p>
-            <p>+15 last 24 hours</p>
-            <h3>Total Active Acres</h3>
-            <div class="chart-container">
-                <div class="chart">Acres Burned</div>
-                <div class="chart">Fires by Cause</div>
+            <h2>Live Chat</h2>
+            <div class="chat-box" id="chat-box"></div>
+            <div class="chat-input">
+                <input type="text" id="message" placeholder="Type a message">
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
@@ -249,35 +281,32 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js"></script>
     <script>
-        let map;
-        let marker;
-
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 center: { lat: 17.9835, lng: 79.5308 }, // NIT Warangal
-                zoom: 16
+                zoom: 14
             });
 
             marker = new google.maps.Marker({
                 map: map,
-                draggable: true
+                draggable: true,
+                position: { lat: 17.9835, lng: 79.5308 }
             });
 
-            let searchBox = new google.maps.places.SearchBox(document.getElementById("search-box"));
-
-            searchBox.addListener("places_changed", function () {
-                let places = searchBox.getPlaces();
-                if (places.length === 0) return;
-
-                let place = places[0];
-                let location = place.geometry.location;
-
-                map.setCenter(location);
-                map.setZoom(12);
-                marker.setPosition(location);
+            // Create a circle around the point
+            let circle = new google.maps.Circle({
+                map: map,
+                center: { lat: 17.9835, lng: 79.5308 },
+                radius: 500, // Radius in meters
+                strokeColor: "#0000FF",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#0000FF",
+                fillOpacity: 0.35
             });
+
+            circle.setMap(map);
         }
-
         const ctx = document.getElementById('liveChart').getContext('2d');
 
         // Initial Data
@@ -355,10 +384,13 @@
 
         function sendMessage() {
             const message = document.getElementById("message").value;
-            db.collection("messages").add({
-                text: message,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            if (message.trim() !== "") {
+                db.collection("messages").add({
+                    text: message,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById("message").value = "";
+            }
         }
 
         db.collection("messages").orderBy("timestamp").onSnapshot(snapshot => {

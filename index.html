@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Info Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: white;
+        }
+
+        header {
+            background: #d9534f;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 28px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        nav {
+            background: #444;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0px 15px;
+            font-size: 18px;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        nav a:hover {
+            color: #d9534f;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .panel {
+            background: #292929;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-in-out forwards;
+        }
+
+        .map {
+            height: 300px;
+            background: url(fire.jpg) no-repeat center;
+            background-size: cover;
+            position: relative;
+            border-radius: 5px;
+        }
+
+        .stat {
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .chart {
+            width: 45%;
+            height: 100px;
+            background: #333;
+            border-radius: 5px;
+            text-align: center;
+            padding: 10px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .upload-section {
+            background: #333;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .upload-section h2 {
+            margin-bottom: 15px;
+        }
+
+        .upload-section input,
+        .upload-section textarea {
+            width: 80%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .upload-section button {
+            background: #d9534f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .upload-section button:hover {
+            background: #c9302c;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: white;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .chart {
+                width: 80%;
+                margin-bottom: 10px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        #search-box {
+            width: 300px;
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        #livechart {
+            width: 100px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header>RescueNet</header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#alerts">Alerts</a>
+        <a href="#contacts">Contacts</a>
+        <a href="#tips">Preparedness Tips</a>
+        <a href="#previous-disasters">Previous Disasters</a>
+    </nav>
+
+    <div class="dashboard">
+        <div class="panel">
+            <h2>Current Wildfires</h2>
+            <p class="stat">37</p>
+            <p>+12 from last week</p>
+            <h3>Wildfire List</h3>
+            <ul>
+                <li>Northridge - 87% contained, 2,147 acres burned</li>
+                <li>Mesa Verde - 17% contained, 13,285 acres burned</li>
+                <li>Blue River - 45% contained, 12,445 acres burned</li>
+            </ul>
+        </div>
+
+        <div class="panel">
+            <h2>Enter a Location to View on Map</h2>
+            <input id="search-box" type="text" placeholder="Type a location...">
+            <div id="map" role="region" aria-label="Map showing disaster locations"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Incidents</h2>
+            <p class="stat">54</p>
+            <p>+15 last 24 hours</p>
+            <h3>Total Active Acres</h3>
+            <div class="chart-container">
+                <div class="chart">Acres Burned</div>
+                <div class="chart">Fires by Cause</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="upload-section">
+        <h2>Submit Disaster Reports</h2>
+        <input type="file" accept="image/*,video/*"><br>
+        <textarea rows="5" placeholder="Describe the situation..."></textarea><br>
+        <button>Submit Report</button>
+    </div>
+    <canvas id="liveChart"></canvas>
+    <div id="chat-box"></div>
+    <input type="text" id="message" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+    <footer>
+        &copy; 2025 Disaster Info Hub | Stay Safe
+    </footer>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js"></script>
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 17.9835, lng: 79.5308 }, // NIT Warangal
+                zoom: 16
+            });
+
+            marker = new google.maps.Marker({
+                map: map,
+                draggable: true
+            });
+
+            let searchBox = new google.maps.places.SearchBox(document.getElementById("search-box"));
+
+            searchBox.addListener("places_changed", function () {
+                let places = searchBox.getPlaces();
+                if (places.length === 0) return;
+
+                let place = places[0];
+                let location = place.geometry.location;
+
+                map.setCenter(location);
+                map.setZoom(12);
+                marker.setPosition(location);
+            });
+        }
+
+        const ctx = document.getElementById('liveChart').getContext('2d');
+
+        // Initial Data
+        let data = {
+            labels: [], // X-axis (Time)
+            datasets: [{
+                label: "Live Data",
+                data: [],
+                borderColor: "blue",
+                borderWidth: 2,
+                fill: false
+            }]
+        };
+
+        // Create Chart
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        title: { display: true, text: 'Time' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Value' }
+                    }
+                }
+            }
+        });
+
+        // Function to Update Chart
+        function updateChart() {
+            let currentTime = new Date().toLocaleTimeString();
+            fetch("https://publicapi.dev/open-disease-api/v3/covid-19/countries/{India}") // Replace with real API
+                .then(response => response.json())
+                .then(json => {
+                    let newData = json.value; // Extract value from API response
+                    data.labels.push(new Date().toLocaleTimeString());
+                    data.datasets[0].data.push(newData);
+
+                    if (data.labels.length > 10) {
+                        data.labels.shift();
+                        data.datasets[0].data.shift();
+                    }
+
+                    myChart.update();
+                });
+            // Simulating new data
+
+            data.labels.push(currentTime);
+            data.datasets[0].data.push(newData);
+
+            if (data.labels.length > 10) {
+                data.labels.shift();
+                data.datasets[0].data.shift();
+            }
+
+            myChart.update();
+        }
+
+        // Auto-Update Every 1 Second
+        setInterval(updateChart, 1000);
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            db.collection("messages").add({
+                text: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        db.collection("messages").orderBy("timestamp").onSnapshot(snapshot => {
+            document.getElementById("chat-box").innerHTML = "";
+            snapshot.forEach(doc => {
+                document.getElementById("chat-box").innerHTML += `<p>${doc.data().text}</p>`;
+            });
+        });
+    </script>
+
+    <!-- Load Google Maps JavaScript API with Places Library -->
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS0WL7OLEJyaKRj1EWqOyd-qZj9ad0yNI&libraries=places&callback=initMap"
+        async defer></script>
+</body>
+
+</html>

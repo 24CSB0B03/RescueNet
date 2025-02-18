@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Info Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: white;
+        }
+        header {
+            background: #d9534f;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 28px;
+        }
+        nav {
+            background: #444;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #d9534f;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .panel {
+            background: #292929;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>Disaster Information Hub</header>
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#alerts">Alerts</a>
+        <a href="#contacts">Contacts</a>
+        <a href="#tips">Preparedness Tips</a>
+        <a href="#previous-disasters">Previous Disasters</a>
+    </nav>
+    <div class="dashboard">
+        <div class="panel">
+            <h2>Current Wildfires</h2>
+            <p class="stat">37</p>
+            <h3>Wildfire List</h3>
+            <ul>
+                <li>Northridge - 87% contained, 2,147 acres burned</li>
+                <li>Mesa Verde - 17% contained, 13,285 acres burned</li>
+                <li>Blue River - 45% contained, 12,445 acres burned</li>
+            </ul>
+        </div>
+        <div class="panel">
+            <h2>Map View</h2>
+            <input id="search-box" type="text" placeholder="Type a location...">
+            <div id="map"></div>
+        </div>
+        <div class="panel">
+            <h2>Incident Reports</h2>
+            <p class="stat">54</p>
+            <canvas id="liveChart"></canvas>
+        </div>
+    </div>
+    <footer>
+        &copy; 2025 Disaster Info Hub | Stay Safe
+    </footer>
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 17.9835, lng: 79.5308 },
+                zoom: 16
+            });
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const ctx = document.getElementById('liveChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: "Live Data", data: [], borderColor: "blue", borderWidth: 2 }] },
+                options: { scales: { x: { type: 'linear', title: { display: true, text: 'Time' } }, y: { title: { display: true, text: 'Value' } } } }
+            });
+            function updateChart() {
+                let currentTime = new Date().toLocaleTimeString();
+                myChart.data.labels.push(currentTime);
+                myChart.data.datasets[0].data.push(Math.floor(Math.random() * 100));
+                if (myChart.data.labels.length > 10) {
+                    myChart.data.labels.shift();
+                    myChart.data.datasets[0].data.shift();
+                }
+                myChart.update();
+            }
+            setInterval(updateChart, 5000);
+        });
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+</body>
+</html>
